@@ -5,7 +5,7 @@
 
 --Descrição:
 
--- Exercío de Aula 09
+-- Exercío de Aula 10
 ----------------------------
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.all;
@@ -33,6 +33,9 @@ PACKAGE fixed_package IS
 	FUNCTION "-"(arg_L, arg_R: fixed) RETURN fixed;
 	FUNCTION "-"(arg_L: fixed; arg_R: INTEGER) RETURN fixed;
 	FUNCTION "-"(arg_L: INTEGER; arg_R: fixed) RETURN fixed;
+	FUNCTION "*"(arg_L, arg_R: fixed) RETURN fixed;
+	FUNCTION "*"(arg_L: fixed; arg_R: INTEGER) RETURN fixed;
+	FUNCTION "*"(arg_L: INTEGER; arg_R: fixed) RETURN fixed;
 
 END fixed_package; 
 
@@ -86,7 +89,7 @@ PACKAGE BODY fixed_package IS
 			VARIABLE Mij: matrix(0 TO M-1, 0 TO M+N-1);
 			VARIABLE Cij: matrix(0 TO M-1, 0 TO M+N);
 			VARIABLE Pij: matrix(0 TO M, 0 to M+N);
-			VARIABLE blinha: fixed(m+n-1 downto 0);
+			VARIABLE blinha: fixed(M+N-1 downto 0);
 			VARIABLE P: fixed(M+N-1 DOWNTO 0);
 		BEGIN
 			
@@ -244,4 +247,69 @@ PACKAGE BODY fixed_package IS
 			arg_F := to_fixed(arg_L);
 			RETURN arg_F - arg_R;
 		END "-";
+		
+		FUNCTION "*"(arg_L, arg_R: fixed) RETURN fixed IS
+			VARIABLE res_ext: fixed((arg_R'LENGTH + arg_L'LENGTH)-1 DOWNTO 0);
+			VARIABLE res: fixed(arg_R'LENGTH-1 DOWNTO 0);
+			VARIABLE res_0: fixed((arg_R'LENGTH + arg_L'LENGTH)-1 DOWNTO 0);
+			VARIABLE res_0_R: fixed ((arg_R'LENGTH - 1) DOWNTO 0); 
+			VARIABLE res_0_L: fixed ((arg_L'LENGTH - 1) DOWNTO 0); 
+		BEGIN
+		
+			FOR k IN (arg_R'LENGTH-1) DOWNTO 0 LOOP
+				res_0_R(k) := '0';
+			END LOOP;
+			
+			FOR k IN (arg_L'LENGTH-1) DOWNTO 0 LOOP
+				res_0_L(k) := '0';
+			END LOOP;
+			
+			FOR k IN (arg_R'LENGTH + arg_L'LENGTH - 1) DOWNTO 0 LOOP
+				res_0(k) := '0';
+			END LOOP;
+			
+			IF arg_L(arg_L'LENGTH - 1) = '1' AND arg_R(arg_R'LENGTH - 1) = '1'  THEN
+				res_ext := MULT_FIXED(ADD_SUB_FIXED(COMP1_FIXED(arg_L),res_0_L,'1'), ADD_SUB_FIXED(COMP1_FIXED(arg_R),res_0_R,'1'));
+			END IF;
+			
+			IF arg_L(arg_L'LENGTH - 1) = '1' AND arg_R(arg_R'LENGTH - 1) = '0'  THEN
+				res_ext := MULT_FIXED(ADD_SUB_FIXED(COMP1_FIXED(arg_L),res_0_L,'1'), arg_R);
+				res_ext := ADD_SUB_FIXED(COMP1_FIXED(res_ext),res_0,'1');
+			END IF;
+			
+			IF arg_L(arg_L'LENGTH - 1) = '0' AND arg_R(arg_R'LENGTH - 1) = '1'  THEN
+				res_ext := MULT_FIXED(arg_L,ADD_SUB_FIXED(COMP1_FIXED(arg_R),res_0_R,'1'));
+				res_ext := ADD_SUB_FIXED(COMP1_FIXED(res_ext),res_0,'1');
+			END IF;
+			
+			IF arg_L(arg_L'LENGTH - 1) = '0' AND arg_R(arg_R'LENGTH - 1) = '0'  THEN
+				res_ext := MULT_FIXED(arg_L,arg_R);
+			END IF;
+			res := res_ext(2*(arg_R'LENGTH)-1 DOWNTO arg_R'LENGTH);
+			return res;
+		END "*";
+		
+		FUNCTION "*"(arg_L: fixed; arg_R: INTEGER) RETURN fixed IS
+			CONSTANT M: INTEGER := arg_L'LENGTH;
+			CONSTANT N: INTEGER := arg_L'LENGTH;
+			VARIABLE res: fixed(M+N-1 DOWNTO 0);
+			VARIABLE arg_F: fixed(M+N-1 DOWNTO 0);
+		BEGIN
+			arg_F := to_fixed(arg_R);
+			res := arg_L * arg_F;
+			RETURN res;
+		END "*";
+		
+		FUNCTION "*"(arg_L: INTEGER; arg_R: fixed) RETURN fixed IS
+			CONSTANT M: INTEGER := arg_R'LENGTH;
+			CONSTANT N: INTEGER := arg_R'LENGTH;
+			VARIABLE res: fixed(M-1 DOWNTO 0);
+			VARIABLE arg_F: fixed(arg_R'LENGTH-1 DOWNTO 0);
+		BEGIN
+			arg_F := to_fixed(arg_L);
+			res := arg_F * arg_R;
+			RETURN res;
+		END "*";
+			
+			
 END fixed_package;
