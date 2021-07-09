@@ -16,27 +16,28 @@ PACKAGE fixed_package IS
 	CONSTANT N_BIT: INTEGER := 16;
 	CONSTANT max_ind: INTEGER := 15;
 	CONSTANT min_ind: INTEGER := -15;
-	TYPE fixed IS ARRAY(NATURAL RANGE <>)OF BIT;
-	TYPE matrix is array (NATURAL RANGE <>, NATURAL RANGE <>) OF BIT;
+	TYPE fixed IS ARRAY(INTEGER RANGE <>)OF BIT;
+	TYPE matrix IS ARRAY (NATURAL RANGE <>, NATURAL RANGE <>) OF BIT;
 	SUBTYPE fixed_range IS integer RANGE min_ind TO max_ind;
 	FUNCTION MAX (arg_L, arg_R: INTEGER) RETURN INTEGER;
 	FUNCTION MIN (arg_L, arg_R: INTEGER) RETURN INTEGER;
 	FUNCTION COMP1_FIXED(arg_L: fixed) RETURN fixed;
-	FUNCTION ADD_SUB_FIXED (arg_L, arg_R: fixed; c: bit) RETURN fixed;
+	FUNCTION ADD_SUB_FIXED (arg_L, arg_R: fixed; c: BIT) RETURN fixed;
 	FUNCTION MULT_FIXED (arg_L, arg_R: fixed) RETURN fixed;
 	FUNCTION to_fixed (arg_L: INTEGER; max_range: fixed_range := MAX_IND;
 						min_range: fixed_range := 0) RETURN fixed;
 	FUNCTION to_integer (arg_L: fixed) RETURN integer;
 	FUNCTION "+"(arg_L, arg_R: fixed) RETURN fixed;
 	FUNCTION "+"(arg_L: fixed; arg_R: INTEGER) RETURN fixed;
-	FUNCTION "+"(arg_L: INTEGER; arg_R: fixed) return fixed;
+	FUNCTION "+"(arg_L: INTEGER; arg_R: fixed) RETURN fixed;
 	FUNCTION "-"(arg_L, arg_R: fixed) RETURN fixed;
 	FUNCTION "-"(arg_L: fixed; arg_R: INTEGER) RETURN fixed;
 	FUNCTION "-"(arg_L: INTEGER; arg_R: fixed) RETURN fixed;
 	FUNCTION "*"(arg_L, arg_R: fixed) RETURN fixed;
 	FUNCTION "*"(arg_L: fixed; arg_R: INTEGER) RETURN fixed;
 	FUNCTION "*"(arg_L: INTEGER; arg_R: fixed) RETURN fixed;
-
+	FUNCTION to_fixed (arg_L: REAL; max_range, min_range: fixed_range) RETURN fixed;
+	FUNCTION to_real (arg_L: fixed) RETURN REAL;
 END fixed_package; 
 
 PACKAGE BODY fixed_package IS
@@ -62,20 +63,20 @@ PACKAGE BODY fixed_package IS
 		END MIN;
 	--COMP1_FIXED
 		FUNCTION COMP1_FIXED(arg_L: fixed) RETURN fixed IS
-			VARIABLE arg_L_COMP1: fixed(arg_L'LENGTH-1 DOWNTO 0);
+			VARIABLE arg_L_COMP1: fixed(arg_L'HIGH DOWNTO arg_L'LOW);
 		BEGIN
-			FOR k in 0 TO arg_L'LENGTH-1 LOOP
+			FOR k in arg_L'LOW TO arg_L'HIGH LOOP
 				arg_L_COMP1(k) := NOT(arg_L(k)); 
 			END LOOP;
 			RETURN arg_L_COMP1;
 		END COMP1_FIXED;
 	--ADD_SUB_FIXED
 		FUNCTION ADD_SUB_FIXED (arg_L, arg_R: fixed; c: bit) return fixed IS
-			VARIABLE s: fixed(0 TO arg_L'LENGTH-1);
+			VARIABLE s: fixed(arg_L'HIGH DOWNTO arg_L'LOW);
 			VARIABLE v: bit;
 		BEGIN
 			v := c;
-			FOR k in 0 TO arg_L'LENGTH -1 LOOP
+			FOR k in arg_L'LOW TO arg_L'HIGH LOOP
 				s(k) := (arg_L(k) XOR arg_R(k)) XOR v;
 				v := (arg_L(k) AND arg_R(k)) OR (v AND (arg_L(k) OR arg_R(k)));
 			END LOOP;
@@ -166,7 +167,7 @@ PACKAGE BODY fixed_package IS
 			END IF;
 			
 			IF arg_L < 0 THEN
-				res(max_range) := '1';
+				res := ADD_SUB_FIXED(COMP1_FIXED(res),res_0,'1');
 			END IF;
 			
 			RETURN res;
@@ -285,15 +286,15 @@ PACKAGE BODY fixed_package IS
 			IF arg_L(arg_L'LENGTH - 1) = '0' AND arg_R(arg_R'LENGTH - 1) = '0'  THEN
 				res_ext := MULT_FIXED(arg_L,arg_R);
 			END IF;
-			res := res_ext(2*(arg_R'LENGTH)-1 DOWNTO arg_R'LENGTH);
+			res := res_ext((arg_R'LENGTH)-1 DOWNTO 0);
 			return res;
 		END "*";
 		
 		FUNCTION "*"(arg_L: fixed; arg_R: INTEGER) RETURN fixed IS
 			CONSTANT M: INTEGER := arg_L'LENGTH;
 			CONSTANT N: INTEGER := arg_L'LENGTH;
-			VARIABLE res: fixed(M+N-1 DOWNTO 0);
-			VARIABLE arg_F: fixed(M+N-1 DOWNTO 0);
+			VARIABLE res: fixed(M-1 DOWNTO 0);
+			VARIABLE arg_F: fixed(arg_L'RANGE);
 		BEGIN
 			arg_F := to_fixed(arg_R);
 			res := arg_L * arg_F;
@@ -304,12 +305,117 @@ PACKAGE BODY fixed_package IS
 			CONSTANT M: INTEGER := arg_R'LENGTH;
 			CONSTANT N: INTEGER := arg_R'LENGTH;
 			VARIABLE res: fixed(M-1 DOWNTO 0);
-			VARIABLE arg_F: fixed(arg_R'LENGTH-1 DOWNTO 0);
+			VARIABLE arg_F: fixed(arg_R'RANGE);
 		BEGIN
 			arg_F := to_fixed(arg_L);
 			res := arg_F * arg_R;
 			RETURN res;
 		END "*";
+		--to_real
+		FUNCTION to_real (arg_L: fixed) RETURN REAL IS
+			VARIABLE res: REAL := 0.0;
+			VARIABLE arg_F: fixed(arg_L'RANGE);
+			VARIABLE res_0_L: fixed(arg_L'RANGE);
+		BEGIN
+		
+			FOR k IN arg_L'RANGE LOOP
+				res_0_L(k) := '0';
+			END LOOP;
 			
+			arg_F := arg_L;
+			IF arg_L(arg_L'HIGH)='1' THEN
+				arg_F := ADD_SUB_FIXED(COMP1_FIXED(arg_F),res_0_L,'1');
+			END IF;
 			
+			FOR k IN arg_F'RANGE LOOP 
+				IF arg_F(k+max_ind-1) = '1' THEN
+					res := res + (2.0**k);
+				END IF;
+			END LOOP;
+			
+			IF arg_L(arg_L'HIGH)='1' THEN
+				res := res * (-1.0);
+			END IF;
+			
+			RETURN res;
+		END to_real;	
+		
+	--to_fixed
+		FUNCTION to_fixed (arg_L: REAL; max_range, min_range: fixed_range) RETURN fixed IS
+			CONSTANT abs_real : REAL := ABS(arg_L);
+			CONSTANT min_range_real : REAL := 2.0**(min_range);
+			CONSTANT max_range_real : REAL := 2.0**(max_range);
+			VARIABLE int_part : REAL := 0.0;
+			VARIABLE frac_part: REAL := 0.0;
+			VARIABLE int_res: INTEGER := 0;
+			VARIABLE res: fixed(max_range DOWNTO min_range);
+			VARIABLE res_0: fixed(max_range DOWNTO min_range);
+		BEGIN
+
+			IF abs_real < min_range_real OR arg_L=0.0 THEN
+				FOR k IN max_range DOWNTO min_range LOOP
+					res(k) := '0';
+				END LOOP;
+			ELSIF arg_L >= max_range_real THEN
+				FOR k IN max_range DOWNTO min_range LOOP
+					res(k) := '1';
+				END LOOP;
+				res(max_range):='0';
+			ELSIF arg_L <= -max_range_real THEN
+				FOR k IN max_range DOWNTO min_range LOOP
+					res(k) := '0';
+				END LOOP;
+				res(max_range):='1';
+			ELSE
+				int_part := floor(abs_real);
+				frac_part := abs_real - int_part;
+				int_res := INTEGER(int_part);
+				
+				FOR k IN res'RANGE LOOP
+					res(k) := '0';
+				END LOOP;
+				
+				FOR k IN 0 TO res'HIGH-1 LOOP
+					IF int_res >= 1 AND int_res >= -1 THEN 
+						IF (int_res MOD 2) = 0 THEN
+							res(k) := '0';
+						ELSE
+							res(k) := '1';
+						END IF;
+						int_res := INTEGER(int_res / 2);
+					ELSE
+						res(k) := '0';
+					END IF;
+				END LOOP;
+				
+				FOR k IN -1 DOWNTO res'LOW LOOP	
+					IF frac_part /= 1.0 THEN
+						frac_part := frac_part * 2.0;
+					END IF;
+					
+					IF frac_part > 1.0 THEN
+						res(k) := '1';
+						frac_part := frac_part - 1.0;
+					ELSIF frac_part < 1.0 THEN 
+						res(k) := '0';
+					ELSIF frac_part = 1.0 THEN
+						res(k) := '1';
+						EXIT;
+					END IF;	
+					
+				END LOOP;
+					
+			END IF;
+			
+			FOR k in res'RANGE LOOP
+				res_0(k):='0';
+			END LOOP;
+			
+			IF arg_L < 0.0 THEN
+				res := ADD_SUB_FIXED(COMP1_FIXED(res),res_0,'1');
+			END IF;
+			
+			RETURN res;
+		END to_fixed;
+
 END fixed_package;
