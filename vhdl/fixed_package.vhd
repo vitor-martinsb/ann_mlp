@@ -295,6 +295,7 @@ PACKAGE BODY fixed_package IS
 			VARIABLE res_0_L: fixed ((arg_L'LENGTH - 1) DOWNTO 0); 
 			VARIABLE arg_L_shift: fixed ((arg_L'LENGTH - 1) DOWNTO 0);
 			VARIABLE arg_R_shift: fixed ((arg_R'LENGTH - 1) DOWNTO 0); 
+			VARIABLE res_comp: fixed (arg_L'RANGE);
 		BEGIN
 			arg_L_shift := arg_L;
 			arg_R_shift := arg_R;
@@ -330,7 +331,13 @@ PACKAGE BODY fixed_package IS
 			END IF;
 			
 			
-			RETURN res_ext((arg_R'LENGTH+arg_R'LOW)+arg_R'HIGH DOWNTO (arg_R'LENGTH+arg_R'LOW)+arg_R'LOW);
+			FOR k IN (res_ext'LENGTH - 1) DOWNTO 0 LOOP
+				IF (k-(res_comp'LENGTH) > res_comp'LOW) AND (k-(res_comp'LENGTH) < res_comp'HIGH) THEN
+					res_comp(k-(res_comp'LENGTH)) := res_ext(k);
+				END IF;
+			END LOOP;
+			RETURN res_comp;
+			
 		END "*";
 		
 		FUNCTION "*"(arg_L: fixed; arg_R: INTEGER) RETURN fixed IS
@@ -358,8 +365,8 @@ PACKAGE BODY fixed_package IS
 		FUNCTION "*"(arg_L: fixed; arg_R: REAL) RETURN fixed IS
 			CONSTANT M: INTEGER := arg_L'LENGTH;
 			CONSTANT N: INTEGER := arg_L'LENGTH;
-			VARIABLE res: fixed(arg_L'RANGE);
 			VARIABLE arg_F: fixed(arg_L'RANGE);
+			VARIABLE res: fixed(arg_L'RANGE);
 		BEGIN
 			arg_F := to_fixed(arg_R,arg_L'HIGH,arg_L'LOW);
 			res := arg_L * arg_F;
