@@ -331,10 +331,14 @@ PACKAGE BODY fixed_package IS
 			END IF;
 			
 			
-			FOR k IN (res_ext'LENGTH - 1) DOWNTO 0 LOOP
-				IF (k-(res_comp'LENGTH) > res_comp'LOW) AND (k-(res_comp'LENGTH) < res_comp'HIGH) THEN
-					res_comp(k-(res_comp'LENGTH)) := res_ext(k);
-				END IF;
+--			FOR k IN (res_ext'LENGTH - 1) DOWNTO 0 LOOP
+--				IF (k-(res_comp'LENGTH) > res_comp'LOW) AND (k-(res_comp'LENGTH) < res_comp'HIGH) THEN
+--					res_comp(k-(res_comp'LENGTH)) := res_ext(k);
+--				END IF;
+--			END LOOP;
+
+			FOR k IN res_comp'HIGH DOWNTO res_comp'LOW LOOP
+				res_comp(k) := res_ext(k + res_comp'LENGTH);
 			END LOOP;
 			RETURN res_comp;
 			
