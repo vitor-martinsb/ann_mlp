@@ -7,11 +7,10 @@ ENTITY fixed_package_entity IS
 END fixed_package_entity;
 
 ARCHITECTURE teste OF fixed_package_entity IS
-	CONSTANT VALUE_REAL: REAL := -6.1;
 BEGIN	
 	PROCESS(entrada2)
 	BEGIN
-		entrada1 <= to_fixed(VALUE_REAL,4,-5);
+		entrada1 <= 2 * entrada2;
 	END PROCESS;
 	
 END teste;
