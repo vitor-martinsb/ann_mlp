@@ -10,7 +10,7 @@ ARCHITECTURE teste OF fixed_package_entity IS
 BEGIN	
 	PROCESS(entrada2)
 	BEGIN
-		entrada1 <= 2* entrada2;
+		entrada1 <= entrada2 * (-2.25);
 	END PROCESS;
 	
 END teste;

@@ -5,7 +5,7 @@
 
 --Descrição:
 
--- Exercío de Aula 10
+-- Exercío de Aula 12
 ----------------------------
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.all;
@@ -330,13 +330,6 @@ PACKAGE BODY fixed_package IS
 				res_ext := MULT_FIXED(arg_L_shift,arg_R_shift);
 			END IF;
 			
-			
---			FOR k IN (res_ext'LENGTH - 1) DOWNTO 0 LOOP
---				IF (k-(res_comp'LENGTH) > res_comp'LOW) AND (k-(res_comp'LENGTH) < res_comp'HIGH) THEN
---					res_comp(k-(res_comp'LENGTH)) := res_ext(k);
---				END IF;
---			END LOOP;
-
 			FOR k IN res_comp'HIGH DOWNTO res_comp'LOW LOOP
 				res_comp(k) := res_ext(k + res_comp'LENGTH);
 			END LOOP;
@@ -347,10 +340,11 @@ PACKAGE BODY fixed_package IS
 		FUNCTION "*"(arg_L: fixed; arg_R: INTEGER) RETURN fixed IS
 			CONSTANT M: INTEGER := arg_L'LENGTH;
 			CONSTANT N: INTEGER := arg_L'LENGTH;
+			CONSTANT arg_R_real: REAL := REAL(arg_R);
 			VARIABLE res: fixed(arg_L'RANGE);
 			VARIABLE arg_F: fixed(arg_L'RANGE);
 		BEGIN
-			arg_F := to_fixed(arg_R);
+			arg_F := to_fixed(arg_R_real,arg_L'HIGH,arg_L'LOW);
 			res := arg_L * arg_F;
 			RETURN res;
 		END "*";
@@ -358,10 +352,11 @@ PACKAGE BODY fixed_package IS
 		FUNCTION "*"(arg_L: INTEGER; arg_R: fixed) RETURN fixed IS
 			CONSTANT M: INTEGER := arg_R'LENGTH;
 			CONSTANT N: INTEGER := arg_R'LENGTH;
+			CONSTANT arg_L_real: REAL := REAL(arg_L);
 			VARIABLE res: fixed(arg_R'RANGE);
 			VARIABLE arg_F: fixed(arg_R'RANGE);
 		BEGIN
-			arg_F := to_fixed(arg_L);
+			arg_F := to_fixed(arg_L_real,arg_R'HIGH,arg_R'LOW);
 			res := arg_F * arg_R;
 			RETURN res;
 		END "*";
