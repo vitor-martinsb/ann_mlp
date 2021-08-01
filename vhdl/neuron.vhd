@@ -4,14 +4,14 @@ USE work.fixed_package.all;
 
 ENTITY neuron IS
 	GENERIC( INPUT: INTEGER := 9;
-		Q_L : fixed_range := 4;
-		Q_R : fixed_range := -11
+		Q_L : fixed_range := 3;
+		Q_R : fixed_range := -12
 	);
 	PORT(
 		X : BUFFER fixed_vector(INPUT-1 downto 0, Q_L DOWNTO Q_R);
 		W_1 : BUFFER fixed_vector(INPUT-1 downto 0, Q_L DOWNTO Q_R);
 		B_1 : BUFFER fixed(Q_L DOWNTO Q_R);
-		W_2 : BUFFER fixed( Q_L DOWNTO Q_R);
+		W_2 : BUFFER fixed(Q_L DOWNTO Q_R);
 		B_2 : BUFFER fixed(Q_L DOWNTO Q_R);
 		Y_1 : OUT fixed(Q_L DOWNTO Q_R);
 		Y_2 : OUT fixed(Q_L DOWNTO Q_R)
@@ -76,62 +76,98 @@ BEGIN
 		END LOOP;
 
 --		[0.0000 0.0000 0.0000 0.0000 0.5000 0.0000 1.0000 0.0000 0.0000] B
--- 		[0.0000 1.0000 0.7143 0.5714 0.4286 0.8571 0.8571 0.0000 0.7143] M
 		
-		aux := to_fixed(0.0,Q_L,Q_R);
+		aux := to_fixed(0.0000,Q_L,Q_R);
 		FOR k IN Q_L DOWNTO Q_R LOOP
 			X(0,k) <= aux(k);
 		END LOOP;
 		
-		aux := to_fixed(1.0000,Q_L,Q_R);
+		aux := to_fixed(0.0000,Q_L,Q_R);
 		FOR k IN Q_L DOWNTO Q_R LOOP
 			X(1,k) <= aux(k);
 		END LOOP;
 		
-		aux := to_fixed(0.7143,Q_L,Q_R);
+		aux := to_fixed(0.0000,Q_L,Q_R);
 		FOR k IN Q_L DOWNTO Q_R LOOP
 			X(2,k) <= aux(k);
 		END LOOP;
 		
-		aux := to_fixed(0.5714,Q_L,Q_R);
+		aux := to_fixed(0.0000,Q_L,Q_R);
 		FOR k IN Q_L DOWNTO Q_R LOOP
 			X(3,k) <= aux(k);
 		END LOOP;
 		
-		aux := to_fixed(0.4286,Q_L,Q_R);
+		aux := to_fixed(0.5000,Q_L,Q_R);
 		FOR k IN Q_L DOWNTO Q_R LOOP
 			X(4,k) <= aux(k);
 		END LOOP;
 		
-		aux := to_fixed(0.8571,Q_L,Q_R);
+		aux := to_fixed(0.0000,Q_L,Q_R);
 		FOR k IN Q_L DOWNTO Q_R LOOP
 			X(5,k) <= aux(k);
 		END LOOP;
 		
-		aux := to_fixed(0.8571,Q_L,Q_R);
+		aux := to_fixed(1.0000,Q_L,Q_R);
 		FOR k IN Q_L DOWNTO Q_R LOOP
 			X(6,k) <= aux(k);
 		END LOOP;
 		
-		aux := to_fixed(0.0,Q_L,Q_R);
+		aux := to_fixed(0.0000,Q_L,Q_R);
 		FOR k IN Q_L DOWNTO Q_R LOOP
 			X(7,k) <= aux(k);
 		END LOOP;
 		
-		aux := to_fixed(0.7143,Q_L,Q_R);
+		aux := to_fixed(0.0000,Q_L,Q_R);
 		FOR k IN Q_L DOWNTO Q_R LOOP
 			X(8,k) <= aux(k);
 		END LOOP;
 		
---		X(0) <= to_fixed(0.0,Q_L,Q_R);
---		X(1) <= to_fixed(1.0000,Q_L,Q_R);
---		X(2) <= to_fixed(0.7143,Q_L,Q_R);
---		X(3) <= to_fixed(0.5714,Q_L,Q_R);
---		X(4) <= to_fixed(0.4286,Q_L,Q_R);
---		X(5) <= to_fixed(0.8571,Q_L,Q_R);
---		X(6) <= to_fixed(0.8571,Q_L,Q_R);
---		X(7) <= to_fixed(0.0,Q_L,Q_R);
---		X(8) <= to_fixed(0.7143,Q_L,Q_R);
+-- 		[0.0000 1.0000 0.7143 0.5714 0.4286 0.8571 0.8571 0.0000 0.7143] M		
+
+--		aux := to_fixed(0.0,Q_L,Q_R);
+--		FOR k IN Q_L DOWNTO Q_R LOOP
+--			X(0,k) <= aux(k);
+--		END LOOP;
+--		
+--		aux := to_fixed(1.0000,Q_L,Q_R);
+--		FOR k IN Q_L DOWNTO Q_R LOOP
+--			X(1,k) <= aux(k);
+--		END LOOP;
+--		
+--		aux := to_fixed(0.7143,Q_L,Q_R);
+--		FOR k IN Q_L DOWNTO Q_R LOOP
+--			X(2,k) <= aux(k);
+--		END LOOP;
+--		
+--		aux := to_fixed(0.5714,Q_L,Q_R);
+--		FOR k IN Q_L DOWNTO Q_R LOOP
+--			X(3,k) <= aux(k);
+--		END LOOP;
+--		
+--		aux := to_fixed(0.4286,Q_L,Q_R);
+--		FOR k IN Q_L DOWNTO Q_R LOOP
+--			X(4,k) <= aux(k);
+--		END LOOP;
+--		
+--		aux := to_fixed(0.8571,Q_L,Q_R);
+--		FOR k IN Q_L DOWNTO Q_R LOOP
+--			X(5,k) <= aux(k);
+--		END LOOP;
+--		
+--		aux := to_fixed(0.8571,Q_L,Q_R);
+--		FOR k IN Q_L DOWNTO Q_R LOOP
+--			X(6,k) <= aux(k);
+--		END LOOP;
+--		
+--		aux := to_fixed(0.0,Q_L,Q_R);
+--		FOR k IN Q_L DOWNTO Q_R LOOP
+--			X(7,k) <= aux(k);
+--		END LOOP;
+--		
+--		aux := to_fixed(0.7143,Q_L,Q_R);
+--		FOR k IN Q_L DOWNTO Q_R LOOP
+--			X(8,k) <= aux(k);
+--		END LOOP;
 
 		FOR i in INPUT-1 DOWNTO 0 LOOP
 			FOR j in Q_L DOWNTO Q_R LOOP
@@ -142,7 +178,8 @@ BEGIN
 		END LOOP;
 		v := v-B_1;
 		Y_1 <= Activation2(v);
-		Y_2 <= Activation1(v);
+		Y_2 <= Activation1((Activation2(v)*W_2)-B_2);
+		
 	END PROCESS;
 END STRUTUCTAL;
 			 

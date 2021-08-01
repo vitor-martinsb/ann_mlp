@@ -94,3 +94,6 @@ for k = 1:length(y)
 end
 perc_res=100*(cont_0+cont_1)/length(y);
 fprintf('\n Taxa de acerto: %f \% \n',perc_res);
+
+y_teste_B=net(Data_val(:,1));
+y_teste_M=net(Data_val(:,end));
