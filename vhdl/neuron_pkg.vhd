@@ -45,9 +45,9 @@ PACKAGE BODY neuron_pkg IS
 		ELSIF to_integer(X) < -4 THEN	-- Se      X < -4 SIG =  0.0
 			SIG := minSIG;
 		ELSIF to_integer(X) < 0 THEN	-- Se -4 < X < 0  SIG = (+0.03125*X+0.25)*X+0.5
-			SIG := (0.03125 * (X * X)) + (0.25000 * X) + a0;
+			SIG := (0.03125 * (to_real(X) * to_real(X))) + (0.25000 * to_real(X)) + a0;
 		ELSE							-- Se  0 < X < 4  SIG = (-0.03125*X+0.25)*X+0.5
-			SIG := ((-0.03125) * (X * X)) + (0.25000 * X) + a0;			
+			SIG := ((-0.03125) * (to_real(X) * to_real(X))) + (0.25000 * to_real(X)) + a0;			
 		END IF;
 		RETURN SIG;
 	END; 	
