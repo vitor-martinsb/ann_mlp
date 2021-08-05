@@ -15,8 +15,8 @@ A base de dados é separada da seguinte maneira:
 -15% para validação;
 -15% para teste.
 
-Toda etapa de treinamento (levantamento dos pesos) é realizada utilizando o algoritmo do matlab.
+Toda etapa de treinamento (levantamento dos pesos) é realizada utilizando o algoritmo do matlab (main.m).
 
 Validação:
 
-Os pesos são levantados na classificação e passado para o algoritmo do VHDL, assim, como os dados de entrada a ser desejado.
+Os pesos são levantados na classificação e passado para o algoritmo do VHDL (ann_mlp.vhdl), assim, como os dados de entrada a ser desejado.
